@@ -5,6 +5,7 @@ import copy
 import pdb
 import os
 import numpy as np
+import pdb
 from ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
 
 class Pr2Sim:
@@ -30,7 +31,7 @@ class Pr2Sim:
         start_orientation = p.getQuaternionFromEuler(start_orientation)
         self.model_name_id_dict[model_name] = p.loadURDF(model_path, start_pos, start_orientation, useFixedBase=1)
 
-    def AddBox(self, pose, size, mass, friction):
+    def AddBox(self, model_name, pose, size, mass, friction):
         xyz = [pose[0], pose[1], pose[2]]
         rpy = [pose[3], pose[4], pose[5]]
         half_extents = [size[0]/2, size[1]/2, size[2]/2]
@@ -48,7 +49,9 @@ class Pr2Sim:
                                 baseInertialFramePosition=[0, 0, 0],
                                 baseInertialFrameOrientation=[0, 0, 0, 1])
         p.changeDynamics(body_id, -1, lateralFriction=friction)
-        return body_id    
+        self.model_name_id_dict[model_name] = body_id
+        
+        # return body_id    
 
     def AddCamera(self, target_xyz, camera_height, fov = 60, aspect = 640.0/480.0, near_plane = 0.01, far_plane = 100, img_width = 200, img_height = 200):
         camera_xyz = [target_xyz[0], target_xyz[1], target_xyz[2] + camera_height]
@@ -68,3 +71,13 @@ class Pr2Sim:
     def SetJointPositions(self, model_name, joint_names, target_positions):
         p.setJointMotorControlArray(self.model_name_id_dict[model_name], joints_from_names(self.model_name_id_dict[model_name], joint_names), 
             controlMode=p.POSITION_CONTROL, targetPositions = target_positions)
+
+    def GetNumJoints(self, model_name):
+        return p.getNumJoints(self.model_name_id_dict[model_name])
+
+    def GetJointState(self, model_name, joint_idx):
+        return p.getJointState(self.model_name_id_dict[model_name], joint_idx)
+
+    def GetLinkState(self, model_name, link_idx):
+        return p.getLinkState(self.model_name_id_dict[model_name], link_idx)
+
