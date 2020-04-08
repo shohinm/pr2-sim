@@ -6,7 +6,11 @@ import pdb
 import os
 import numpy as np
 import pdb
-from ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
+# from .ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
+try:
+    from .ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
+except Exception: #ImportError
+    from ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
 
 class Pr2Sim:
     def __init__(self, gui = True): 
@@ -18,6 +22,9 @@ class Pr2Sim:
         p.setTimeStep(1.0/240.0)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         self.model_name_id_dict = {}
+        self.model_joint_to_id_dict = {}
+        self.model_link_to_id_dict = {}
+
         self.LoadModel('plane', 'plane.urdf')
 
     def SetAutoSimStep(self, auto_step):
@@ -31,6 +38,18 @@ class Pr2Sim:
         start_orientation = p.getQuaternionFromEuler(start_orientation)
         self.model_name_id_dict[model_name] = p.loadURDF(model_path, start_pos, start_orientation, useFixedBase=1)
 
+        if model_name not in self.model_joint_to_id_dict:
+            self.model_joint_to_id_dict[model_name] = {}
+        if model_name not in self.model_link_to_id_dict:
+            self.model_link_to_id_dict[model_name] = {}
+        self.model_link_to_id_dict[model_name] = {p.getBodyInfo(self.model_name_id_dict[model_name])[0].decode('UTF-8'):-1,}
+
+        for _id in range(p.getNumJoints(self.model_name_id_dict[model_name])):
+            joint_name = p.getJointInfo(self.model_name_id_dict[model_name], _id)[1].decode('UTF-8')
+            link_name = p.getJointInfo(self.model_name_id_dict[model_name], _id)[12].decode('UTF-8')
+            self.model_joint_to_id_dict[model_name][joint_name] = _id
+            self.model_link_to_id_dict[model_name][link_name] = _id
+        
     def AddBox(self, model_name, pose, size, mass, friction):
         xyz = [pose[0], pose[1], pose[2]]
         rpy = [pose[3], pose[4], pose[5]]
@@ -68,16 +87,21 @@ class Pr2Sim:
     def GetCameraImage(self):
         return p.getCameraImage(self.camera_img_width, self.camera_img_height, self.camera_view_mat, self.camera_projection_mat)
 
-    def SetJointPositions(self, model_name, joint_names, target_positions):
+    def MoveJoints(self, model_name, joint_names, target_positions):
         p.setJointMotorControlArray(self.model_name_id_dict[model_name], joints_from_names(self.model_name_id_dict[model_name], joint_names), 
             controlMode=p.POSITION_CONTROL, targetPositions = target_positions)
 
     def GetNumJoints(self, model_name):
         return p.getNumJoints(self.model_name_id_dict[model_name])
 
-    def GetJointState(self, model_name, joint_idx):
-        return p.getJointState(self.model_name_id_dict[model_name], joint_idx)
+    def GetJointState(self, model_name, joint_name):
+        return p.getJointState(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[joint_name])
 
-    def GetLinkState(self, model_name, link_idx):
-        return p.getLinkState(self.model_name_id_dict[model_name], link_idx)
+    def GetJointStates(self, model_name, joint_names):
+        return p.getJointStates(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[joint_names])
 
+    def GetLinkState(self, model_name, link_name):
+        return p.getLinkState(self.model_name_id_dict[model_name], self.model_link_to_id_dict[link_name])
+
+    def GetLinkStates(self, model_name, link_names):
+        return p.getLinkStates(self.model_name_id_dict[model_name], self.model_link_to_id_dict[link_names])

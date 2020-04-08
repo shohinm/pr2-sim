@@ -26,18 +26,16 @@ def main():
     # bid = sim.AddBox('table', table_pose, table_size_xyz, table_mass, table_friction)
     sim.AddCamera(camera_target_xyz, camera_height)
 
-    pdb.set_trace()
-
     # init_state = [0.16825, -1.69017, 0.0788625, -1.14571, -1.2717, -0.151824, -1.25254, 0.675062]
 
-    init_state = [1.69017, 0.0788625, -1.14571, -1.2717, -0.151824, -1.25254, 0.675062]
+    init_state = [-1.69017, 0.0788625, -1.14571, -1.2717, -0.151824, -1.25254, 0.675062]
 
     init_joints = ['r_shoulder_pan_joint', 'r_shoulder_lift_joint', 'r_upper_arm_roll_joint', 'r_elbow_flex_joint', 'r_forearm_roll_joint', 'r_wrist_flex_joint', 'r_wrist_roll_joint']
-    sim.SetJointPositions('robot', init_joints, init_state)
+    sim.MoveJoints('robot', init_joints, init_state)
 
 
     # position = REST_LEFT_ARM
-    # sim.SetJointPositions('robot', PR2_GROUPS['left_arm'], position)
+    # sim.MoveJoints('robot', PR2_GROUPS['left_arm'], position)
 
     for i in range(400):
         sim.Step()
