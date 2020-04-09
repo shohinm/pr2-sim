@@ -12,7 +12,7 @@ except Exception: #ImportError
     from ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
 
 class Pr2Sim:
-    def __init__(self, gui = True): 
+    def __init__(self, gui = True, dt = 1.0/240.0): 
         p.connect(p.GUI) if gui else p.connect(p.DIRECT)
         p.setGravity(0, 0, -10)
         # Disable auto real-time simulation
