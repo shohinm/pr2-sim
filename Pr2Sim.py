@@ -5,7 +5,6 @@ import copy
 import pdb
 import os
 import numpy as np
-import pdb
 # from .ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
 try:
     from .ss_pybullet.pybullet_tools.utils import joint_from_name, joints_from_names, get_subtree_aabb, get_joints
@@ -95,13 +94,25 @@ class Pr2Sim:
         return p.getNumJoints(self.model_name_id_dict[model_name])
 
     def GetJointState(self, model_name, joint_name):
-        return p.getJointState(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[joint_name])
+        return p.getJointState(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name])
 
     def GetJointStates(self, model_name, joint_names):
-        return p.getJointStates(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[joint_names])
+        return [self.GetJointState(model_name, joint_name) for joint_name in joint_names] 
+
+    def GetAllLinkNames(self, model_name):
+        return self.model_joint_to_id_dict[model_name].keys()
 
     def GetLinkState(self, model_name, link_name):
-        return p.getLinkState(self.model_name_id_dict[model_name], self.model_link_to_id_dict[link_name])
+        if self.model_link_to_id_dict[model_name][link_name] == -1:
+            return p.getBasePositionAndOrientation(self.model_name_id_dict[model_name]) 
+        else:
+            return p.getLinkState(self.model_name_id_dict[model_name], self.model_link_to_id_dict[model_name][link_name])
 
     def GetLinkStates(self, model_name, link_names):
-        return p.getLinkStates(self.model_name_id_dict[model_name], self.model_link_to_id_dict[link_names])
+        return [self.GetLinkState(model_name, link_name) for link_name in link_names]
+
+    def GetAllLinkNames(self, model_name):
+        return self.model_link_to_id_dict[model_name].keys()
+
+
+
