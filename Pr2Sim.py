@@ -86,8 +86,13 @@ class Pr2Sim:
     def GetCameraImage(self):
         return p.getCameraImage(self.camera_img_width, self.camera_img_height, self.camera_view_mat, self.camera_projection_mat)
 
+    def MoveJoint(self, model_name, joint_name, target_position):
+        p.setJointMotorControl2(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name], 
+            controlMode=p.POSITION_CONTROL, targetPosition = target_position)
+
     def MoveJoints(self, model_name, joint_names, target_positions):
-        p.setJointMotorControlArray(self.model_name_id_dict[model_name], joints_from_names(self.model_name_id_dict[model_name], joint_names), 
+        joint_ids = [self.model_joint_to_id_dict[model_name][joint_name] for joint_name in joint_names]
+        p.setJointMotorControlArray(self.model_name_id_dict[model_name], joint_ids, 
             controlMode=p.POSITION_CONTROL, targetPositions = target_positions)
 
     def GetNumJoints(self, model_name):
@@ -105,7 +110,7 @@ class Pr2Sim:
     def GetJointLimits(self, model_name, joint_name):
         return p.getJointInfo(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name])[8:10]
 
-    def GetAllLinkNames(self, model_name):
+    def GetAllJointNames(self, model_name):
         return self.model_joint_to_id_dict[model_name].keys()
 
     def GetLinkState(self, model_name, link_name):
