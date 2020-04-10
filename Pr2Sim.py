@@ -26,6 +26,12 @@ class Pr2Sim:
 
         self.LoadModel('plane', 'plane.urdf')
 
+    def JointFromName(self, model_name, joint_name):
+        return self.model_joint_to_id_dict[model_name][joint_name]
+
+    def JointsFromNames(self, model_names, joint_names):
+        return [self.model_joint_to_id_dict[model_names][joint_name] for joint_name in joint_names]
+
     def SetAutoSimStep(self, auto_step):
         p.setRealTimeSimulation(int(auto_step))
              
@@ -87,28 +93,28 @@ class Pr2Sim:
         return p.getCameraImage(self.camera_img_width, self.camera_img_height, self.camera_view_mat, self.camera_projection_mat)
 
     def MoveJoint(self, model_name, joint_name, target_position):
-        p.setJointMotorControl2(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name], 
+        p.setJointMotorControl2(self.model_name_id_dict[model_name], self.JointFromName(model_name, joint_name), 
             controlMode=p.POSITION_CONTROL, targetPosition = target_position)
 
     def MoveJoints(self, model_name, joint_names, target_positions):
-        joint_ids = [self.model_joint_to_id_dict[model_name][joint_name] for joint_name in joint_names]
-        p.setJointMotorControlArray(self.model_name_id_dict[model_name], joint_ids, 
+        p.setJointMotorControlArray(self.model_name_id_dict[model_name], self.JointsFromNames(model_name, joint_names), 
             controlMode=p.POSITION_CONTROL, targetPositions = target_positions)
 
     def GetNumJoints(self, model_name):
         return p.getNumJoints(self.model_name_id_dict[model_name])
 
     def GetJointState(self, model_name, joint_name):
-        return p.getJointState(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name])
+        return p.getJointState(self.model_name_id_dict[model_name], self.JointFromName(model_name, joint_name))
 
     def GetJointStates(self, model_name, joint_names):
         return [self.GetJointState(model_name, joint_name) for joint_name in joint_names] 
 
     def GetJointInfo(self, model_name, joint_name):
-        return p.getJointInfo(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name])
+        return p.getJointInfo(self.model_name_id_dict[model_name], self.JointFromName(model_name, joint_name))
 
     def GetJointLimits(self, model_name, joint_name):
-        return p.getJointInfo(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name])[8:10]
+        pdb.set_trace()
+        return p.getJointInfo(self.model_name_id_dict[model_name], self.JointFromName(model_name, joint_name))[8:10]
 
     def GetAllJointNames(self, model_name):
         return self.model_joint_to_id_dict[model_name].keys()
