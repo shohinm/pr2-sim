@@ -27,7 +27,7 @@ class Pr2Sim:
         self.LoadModel('plane', 'plane.urdf')
 
     def SetAutoSimStep(self, auto_step):
-        p.setRealTimeSimulation(1) if auto_step else p.setRealTimeSimulation(0) 
+        p.setRealTimeSimulation(int(auto_step))
              
     def Step(self):
         p.stepSimulation()
@@ -98,6 +98,12 @@ class Pr2Sim:
 
     def GetJointStates(self, model_name, joint_names):
         return [self.GetJointState(model_name, joint_name) for joint_name in joint_names] 
+
+    def GetJointInfo(self, model_name, joint_name):
+        return p.getJointInfo(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name])
+
+    def GetJointLimits(self, model_name, joint_name):
+        return p.getJointInfo(self.model_name_id_dict[model_name], self.model_joint_to_id_dict[model_name][joint_name])[8:10]
 
     def GetAllLinkNames(self, model_name):
         return self.model_joint_to_id_dict[model_name].keys()
