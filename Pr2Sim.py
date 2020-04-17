@@ -109,11 +109,17 @@ class Pr2Sim:
     def GetJointStates(self, model_name, joint_names):
         return [self.GetJointState(model_name, joint_name) for joint_name in joint_names] 
 
+    def ResetJointState(self, model_name, joint_name, joint_state):
+        p.resetJointState(self.model_name_id_dict[model_name], self.JointFromName(model_name, joint_name), joint_state)
+
+    def ResetJointStates(self, model_name, joint_names, joint_states):
+        for joint_name, joint_state in zip(joint_names, joint_states):
+            self.ResetJointState(model_name, joint_name, joint_state)
+    
     def GetJointInfo(self, model_name, joint_name):
         return p.getJointInfo(self.model_name_id_dict[model_name], self.JointFromName(model_name, joint_name))
 
     def GetJointLimits(self, model_name, joint_name):
-        pdb.set_trace()
         return p.getJointInfo(self.model_name_id_dict[model_name], self.JointFromName(model_name, joint_name))[8:10]
 
     def GetAllJointNames(self, model_name):
