@@ -17,8 +17,7 @@ class Pr2Sim:
         p.setGravity(0, 0, -10)
         # Disable auto real-time simulation
         self.SetAutoSimStep(False)
-        # Defualt is 240 Hz, do not change
-        p.setTimeStep(1.0/240.0)
+        p.setTimeStep(dt)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         self.model_name_id_dict = {}
         self.model_joint_to_id_dict = {}
