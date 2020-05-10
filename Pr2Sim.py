@@ -53,7 +53,13 @@ class Pr2Sim:
             link_name = p.getJointInfo(self.model_name_id_dict[model_name], _id)[12].decode('UTF-8')
             self.model_joint_to_id_dict[model_name][joint_name] = _id
             self.model_link_to_id_dict[model_name][link_name] = _id
-        
+    
+    def ModelExists(self, model_name):
+        return model_name in self.model_name_id_dict
+
+    def LinkExists(self, model_name, link_name):
+        return self.ModelExists(model_name) and link_name in self.model_link_to_id_dict[model_name] 
+
     def AddBox(self, model_name, pose, size, mass, friction):
         xyz = [pose[0], pose[1], pose[2]]
         rpy = [pose[3], pose[4], pose[5]]
@@ -136,5 +142,7 @@ class Pr2Sim:
     def GetAllLinkNames(self, model_name):
         return self.model_link_to_id_dict[model_name].keys()
 
-
+    def ComputeIK(self, model_name, end_effector_name, target_position):
+        return p.calculateInverseKinematics(self.model_name_id_dict[model_name], 
+            self.model_link_to_id_dict[model_name][end_effector_name], target_position)
 
